@@ -8,3 +8,6 @@ target_goal: 30000000000
 
 # Thời gian tính bằng ngày ($D)
 timeframe_days: 365
+
+# Phong cách rủi ro (SAFE / AGGRESSIVE)
+risk_strategy: "SAFE"

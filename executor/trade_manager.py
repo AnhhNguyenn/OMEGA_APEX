@@ -88,10 +88,18 @@ class TradeManager:
         Verify if the system should halt trading.
         Halts if:
         1. Current drawdown exceeds max allowed ($R threshold).
-        2. Accumulated operational/API costs exceed 10% of the daily expected profit.
+        2. Accumulated operational/API costs exceed threshold.
         """
-        if current_loss > self.max_loss_threshold_usd:
-            msg = f"Loss {current_loss} exceeds threshold {self.max_loss_threshold_usd}"
+        # Dynamic Risk Adjustment
+        if BotState.risk_strategy == "AGGRESSIVE":
+            loss_threshold = self.max_loss_threshold_usd * 4  # e.g., $2000
+            max_allowed_cost = self.expected_daily_profit * 0.30 # 30% of profit
+        else:
+            loss_threshold = self.max_loss_threshold_usd      # e.g., $500
+            max_allowed_cost = self.expected_daily_profit * 0.10 # 10% of profit
+            
+        if current_loss > loss_threshold:
+            msg = f"[{BotState.risk_strategy} MODE] Loss {current_loss} exceeds threshold {loss_threshold}"
             logger.warning(f"CIRCUIT BREAKER TRIGGERED: {msg}")
             self.notifier.notify_circuit_breaker(msg)
             self.is_halted = True
@@ -130,12 +138,15 @@ class TradeManager:
             logger.warning("System halted by Circuit Breaker. Rebalancing aborted.")
             return
 
-        logger.info("Executing Auto-Rebalancing...")
+        logger.info(f"Executing Auto-Rebalancing... (Risk Strategy: {BotState.risk_strategy})")
+        
+        sell_conf_thresh = 80 if BotState.risk_strategy == "SAFE" else 60
+        buy_conf_thresh = 90 if BotState.risk_strategy == "SAFE" else 70
         
         # 1. Close underperforming positions
         for symbol, signal_data in signals.items():
             if symbol in self.active_positions:
-                if signal_data.get("decision") == "SELL" and signal_data.get("confidence", 0) > 80:
+                if signal_data.get("decision") == "SELL" and signal_data.get("confidence", 0) > sell_conf_thresh:
                     logger.info(f"Closing position for {symbol} due to strong SELL signal.")
                     amount_to_sell = self.active_positions[symbol].get("amount", 0)
                     if amount_to_sell > 0:
@@ -163,11 +174,12 @@ class TradeManager:
 
         # 2. Open new positions on strong signals
         for symbol, signal_data in signals.items():
-            if signal_data.get("decision") == "BUY" and signal_data.get("confidence", 0) > 85:
+            if signal_data.get("decision") == "BUY" and signal_data.get("confidence", 0) > buy_conf_thresh:
                 if symbol not in self.active_positions:
                     logger.info(f"Opening new position for {symbol} (Confidence: {signal_data.get('confidence')}%).")
                     
-                    amount_to_buy = 0.01 # Placeholder for Kelly sizing
+                    kelly_f = 0.5 if BotState.risk_strategy == "SAFE" else 1.0 # Fraction of Kelly bet
+                    amount_to_buy = 0.01 * kelly_f # Placeholder logic mimicking size adjustments
                     reason = signal_data.get("reason", "Strong BUY consensus from AI debate.")
                     trade_payload = {"symbol": symbol, "side": "BUY", "amount": amount_to_buy}
                     
