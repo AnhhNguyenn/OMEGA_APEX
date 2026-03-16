@@ -1,6 +1,10 @@
 import numpy as np
 from typing import Dict, Any
 
+from config.logger_setup import setup_logger
+
+logger = setup_logger("math_tools")
+
 def calculate_kelly(win_rate: float, win_loss_ratio: float, trading_fee_pct: float, api_cost_fixed: float, capital: float) -> float:
     """
     Calculate the optimal Kelly Criterion fraction, adjusted for trading fees and fixed API costs.
@@ -40,10 +44,11 @@ def calculate_kelly(win_rate: float, win_loss_ratio: float, trading_fee_pct: flo
     if b <= 0:
         return 0.0
         
-    kelly_fraction = p - (q / b)
+    kelly_fraction = max(0.0, p - (q / b))
+    logger.info(f"Calculated Kelly: p={win_rate:.2f}, R={win_loss_ratio:.2f}, adj_b={b:.2f} -> {kelly_fraction:.4f}")
     
     # Half-Kelly is often used in practice for safety, but we strictly return full Kelly here.
-    return max(0.0, kelly_fraction)
+    return kelly_fraction
 
 
 def target_decomposer(target_capital: float, current_capital: float, remaining_days: int) -> Dict[str, Any]:
@@ -140,4 +145,5 @@ def monte_carlo_simulation(initial_capital: float, target_capital: float,
     successes = np.sum(final_capitals >= target_capital)
     
     probability = successes / iterations
+    logger.info(f"Monte Carlo simulation (1M) results: {successes} successes -> {probability*100:.2f}% probability of $30B.")
     return float(probability)
