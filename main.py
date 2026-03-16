@@ -1,4 +1,5 @@
 import asyncio
+import os
 from config.logger_setup import setup_logger
 from data.market_fetcher import MarketFetcher
 from data.macro_fetcher import MacroFetcher
@@ -15,7 +16,14 @@ class OmegaApexAutopilot:
         self.market_fetcher = MarketFetcher("binance")
         self.macro_fetcher = MacroFetcher()
         self.whale_fetcher = WhaleAlertFetcher()
-        self.trade_manager = TradeManager()
+        
+        api_key = os.environ.get("BINANCE_API_KEY", "mock_key")
+        secret_key = os.environ.get("BINANCE_SECRET_KEY", "mock_secret")
+        self.trade_manager = TradeManager(
+            exchange_id="binance",
+            api_key=api_key,
+            secret=secret_key
+        )
         self.symbols = ["BTC/USDT", "ETH/USDT"] 
         
     async def start(self):
@@ -97,17 +105,14 @@ class OmegaApexAutopilot:
 
 if __name__ == "__main__":
     banner = """
-    █████████  ██████   ██████ ██████████ █████████ ███████████
-   ███░░░░░███░░██████ ██████ ░░███░░░░░█░███░░░░░█░░███░░░░░███
-  ███     ░░░  ░███░█████░███  ░███  █ ░ ░███  █ ░  ░███    ░███
- ░███          ░███░░███ ░███  ░██████   ░██████    ░██████████ 
- ░███          ░███ ░░░  ░███  ░███░░█   ░███░░█    ░███░░░░░███
- ░░███     ███ ░███      ░███  ░███ ░   █░███ ░   █ ░███    ░███
-  ░░█████████  █████     █████ ████████████████████ █████   █████
-   ░░░░░░░░░  ░░░░░     ░░░░░ ░░░░░░░░░░░░░░░░░░░░ ░░░░░   ░░░░░
-    >>> OMEGA APEX AUTOPILOT ENGINE v1.0 <<<
+    ================================================
+               OMEGA APEX AUTOPILOT ENGINE v1.0
+    ================================================
     """
-    print(banner)
+    try:
+        print(banner)
+    except UnicodeEncodeError:
+        print("OMEGA APEX AUTOPILOT ENGINE v1.0")
     
     # We must start both the Telegram Bot and the Autopilot.
     # The TradeManager internally initializes the ApexNotifier (Telegram bot) inside its __init__, and starts its polling in a background task.

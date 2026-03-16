@@ -2,10 +2,8 @@ fastapi
 uvicorn
 langgraph
 ccxt
-pandas_ta
 python-dotenv
 litellm
 aiohttp
-supabase
 pydantic
 python-telegram-bot

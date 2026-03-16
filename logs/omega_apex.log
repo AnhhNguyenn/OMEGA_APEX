@@ -1,2 +1,288 @@
 2026-03-16 17:17:54,268 - [macro_fetcher] - INFO - Fetching real Macro economic sentiment (Fear & Greed)...
 2026-03-16 17:17:57,831 - [whale_fetcher] - INFO - Scanning real-time whale movements for BTC/USDT...
+2026-03-16 17:30:06,709 - [autopilot] - INFO - Initializing OMEGA APEX Autopilot System...
+2026-03-16 17:30:24,428 - [autopilot] - INFO - Initializing OMEGA APEX Autopilot System...
+2026-03-16 17:30:39,394 - [autopilot] - INFO - Initializing OMEGA APEX Autopilot System...
+2026-03-16 17:30:39,412 - [telegram_bot] - WARNING - TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not provided. Telegram bot disabled.
+2026-03-16 17:30:39,414 - [autopilot] - INFO - Warming up data streams...
+2026-03-16 17:30:44,417 - [autopilot] - INFO - 🔥 AUTOPILOT ENGAGED 🔥
+2026-03-16 17:30:44,417 - [macro_fetcher] - INFO - Fetching real Macro economic sentiment (Fear & Greed)...
+2026-03-16 17:30:45,259 - [autopilot] - INFO - 
+--- Analyzing BTC/USDT ---
+2026-03-16 17:30:45,259 - [whale_fetcher] - INFO - Scanning real-time whale movements for BTC/USDT...
+2026-03-16 17:30:46,902 - [whale_fetcher] - ERROR - Error fetching whale data: binance GET https://fapi.binance.com/fapi/v1/exchangeInfo
+Traceback (most recent call last):
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\resolver.py", line 117, in resolve
+    resp = await self._resolver.getaddrinfo(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+aiodns.error.DNSError: (12, 'Timeout while contacting DNS servers')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 1562, in _create_direct_connection
+    hosts = await self._resolve_host(host, port, traces=traces)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 1178, in _resolve_host
+    return await asyncio.shield(resolved_host_task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 1209, in _resolve_host_with_throttle
+    addrs = await self._resolver.resolve(host, port, family=self._family)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\resolver.py", line 126, in resolve
+    raise OSError(None, msg) from exc
+OSError: [Errno None] Timeout while contacting DNS servers
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 241, in fetch
+    async with session_method(yarl.URL(url, encoded=True),
+               ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              data=encoded_body,
+                              ^^^^^^^^^^^^^^^^^^
+                              headers=request_headers,
+                              ^^^^^^^^^^^^^^^^^^^^^^^^
+                              timeout=(self.timeout / 1000),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              proxy=final_proxy) as response:
+                              ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\client.py", line 1510, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\client.py", line 779, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\client.py", line 734, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 672, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 1239, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\aiohttp\connector.py", line 1568, in _create_direct_connection
+    raise ClientConnectorDNSError(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorDNSError: Cannot connect to host fapi.binance.com:443 ssl:default [Timeout while contacting DNS servers]
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\anhnt\Desktop\all\NguyenTienAnh\project\OMEGA_APEX\data\whale_alert_fetcher.py", line 25, in fetch_whale_movements
+    trades = await self.exchange.fetch_trades(symbol, limit=100)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\binance.py", line 4970, in fetch_trades
+    await self.load_markets()
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 365, in load_markets
+    raise e
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 357, in load_markets
+    result = await self.markets_loading
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 324, in load_markets_helper
+    markets = await self.fetch_markets(params)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\binance.py", line 3140, in fetch_markets
+    results = await asyncio.gather(*promisesRaw)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\binance.py", line 11598, in request
+    response = await self.fetch2(path, api, method, params, headers, body, config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 1016, in fetch2
+    raise e
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 1006, in fetch2
+    return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\ccxt\async_support\base\exchange.py", line 281, in fetch
+    raise ExchangeNotAvailable(details) from e
+ccxt.base.errors.ExchangeNotAvailable: binance GET https://fapi.binance.com/fapi/v1/exchangeInfo
+2026-03-16 17:30:46,910 - [autopilot] - INFO - Summoning AI Council...
+2026-03-16 17:30:46,913 - [coordinator] - INFO - [Round 1] Macro Agent checking economic weather...
+2026-03-16 17:30:46,913 - [coordinator] - INFO - [Round 1] Scout is analyzing raw data...
+2026-03-16 17:30:46,914 - [coordinator] - INFO - [Round 1] Whale Tracker scanning for leviathans...
+2026-03-16 17:30:47,292 - [autopilot] - ERROR - Error in trading cycle: litellm.AuthenticationError: GeminiException - {
+  "error": {
+    "code": 400,
+    "message": "API key not valid. Please pass a valid API key.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_INVALID",
+        "domain": "googleapis.com",
+        "metadata": {
+          "service": "generativelanguage.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.LocalizedMessage",
+        "locale": "en-US",
+        "message": "API key not valid. Please pass a valid API key."
+      }
+    ]
+  }
+}
+Traceback (most recent call last):
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\llms\vertex_ai\gemini\vertex_and_google_ai_studio_gemini.py", line 2880, in completion
+    response = client.post(url=url, headers=headers, json=data, logging_obj=logging_obj)  # type: ignore
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 1047, in post
+    raise e
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 1029, in post
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=None'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\main.py", line 3427, in completion
+    response = vertex_chat_completion.completion(  # type: ignore
+        model=model,
+    ...<17 lines>...
+        extra_headers=headers,
+    )
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\llms\vertex_ai\gemini\vertex_and_google_ai_studio_gemini.py", line 2884, in completion
+    raise VertexAIError(
+    ...<3 lines>...
+    )
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 400,
+    "message": "API key not valid. Please pass a valid API key.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_INVALID",
+        "domain": "googleapis.com",
+        "metadata": {
+          "service": "generativelanguage.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.LocalizedMessage",
+        "locale": "en-US",
+        "message": "API key not valid. Please pass a valid API key."
+      }
+    ]
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\anhnt\Desktop\all\NguyenTienAnh\project\OMEGA_APEX\main.py", line 44, in start
+    await self.run_trading_cycle()
+  File "C:\Users\anhnt\Desktop\all\NguyenTienAnh\project\OMEGA_APEX\main.py", line 90, in run_trading_cycle
+    result = brain_orchestrator.invoke(initial_state)
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\main.py", line 3290, in invoke
+    for chunk in self.stream(
+                 ~~~~~~~~~~~^
+        input,
+        ^^^^^^
+    ...<10 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    ):
+    ^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\main.py", line 2724, in stream
+    for _ in runner.tick(
+             ~~~~~~~~~~~^
+        [t for t in loop.tasks.values() if not t.writes],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        schedule_task=loop.accept_push,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\_runner.py", line 258, in tick
+    _panic_or_proceed(
+    ~~~~~~~~~~~~~~~~~^
+        futures.done.union(f for f, t in futures.items() if t is not None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        panic=reraise,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\_runner.py", line 520, in _panic_or_proceed
+    raise exc
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\_executor.py", line 80, in done
+    task.result()
+    ~~~~~~~~~~~^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\concurrent\futures\_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\concurrent\futures\_base.py", line 395, in __get_result
+    raise self._exception
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\concurrent\futures\thread.py", line 86, in run
+    result = ctx.run(self.task)
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\concurrent\futures\thread.py", line 73, in run
+    return fn(*args, **kwargs)
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\pregel\_retry.py", line 71, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\_internal\_runnable.py", line 656, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\langgraph\_internal\_runnable.py", line 400, in invoke
+    ret = self.func(*args, **kwargs)
+  File "C:\Users\anhnt\Desktop\all\NguyenTienAnh\project\OMEGA_APEX\agents\coordinator.py", line 31, in scout_node
+    response = completion(
+        model="gemini/gemini-1.5-flash",
+        messages=[{"role": "user", "content": f"Summarize this market data simply: {state.get('market_data', '')}"}]
+    )
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\utils.py", line 1775, in wrapper
+    raise e
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\utils.py", line 1596, in wrapper
+    result = original_function(*args, **kwargs)
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\main.py", line 4394, in completion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2456, in exception_type
+    raise e
+  File "C:\Users\anhnt\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 1340, in exception_type
+    raise AuthenticationError(
+    ...<4 lines>...
+    )
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: GeminiException - {
+  "error": {
+    "code": 400,
+    "message": "API key not valid. Please pass a valid API key.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_INVALID",
+        "domain": "googleapis.com",
+        "metadata": {
+          "service": "generativelanguage.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.LocalizedMessage",
+        "locale": "en-US",
+        "message": "API key not valid. Please pass a valid API key."
+      }
+    ]
+  }
+}
+
+During task with name 'Scout' and id '5574afcc-fcda-f948-0b7e-02b05d6ef48c'
+2026-03-16 17:30:47,312 - [autopilot] - INFO - Cycle complete. Waiting 300s for next cycle...
