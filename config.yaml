@@ -1,0 +1,10 @@
+# OMEGA APEX Configuration
+
+# Vốn ban đầu ($P)
+capital: 10000
+
+# Mục tiêu lợi nhuận / Lãi ròng ($G)
+target_goal: 30000000000
+
+# Thời gian tính bằng ngày ($D)
+timeframe_days: 365
