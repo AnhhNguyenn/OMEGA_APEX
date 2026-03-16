@@ -8,3 +8,4 @@ litellm
 aiohttp
 supabase
 pydantic
+python-telegram-bot

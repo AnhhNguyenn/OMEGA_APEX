@@ -4,7 +4,7 @@ import traceback
 from typing import Dict, Any
 
 from data.db_manager import DatabaseManager
-from agents.notifier import ApexNotifier
+from agents.notifier import ApexNotifier, BotState
 from config.logger_setup import setup_logger
 
 logger = setup_logger("trade_manager")
@@ -30,6 +30,41 @@ class TradeManager:
         self.db = DatabaseManager()
         self.notifier = ApexNotifier()
         self.milestone_thresholds = [20000, 50000, 100000, 1000000, 1000000000, 30000000000]
+        
+        # Link the notifier's callback to our executor method
+        BotState.trade_executor_callback = self.execute_approved_trade
+
+    def execute_approved_trade(self, trade_data: Dict[str, Any]):
+        """
+        Actually fires the order to Binance. Called by Notifier on 'Approve' or directly if FULL_AUTO.
+        """
+        symbol = trade_data["symbol"]
+        side = trade_data["side"]
+        amount = trade_data["amount"]
+        
+        try:
+            if side.upper() == "BUY":
+                order = self.exchange.create_market_buy_order(symbol, amount)
+            else:
+                order = self.exchange.create_market_sell_order(symbol, amount)
+                
+            fee = order.get('fee', {}).get('cost', 0.5)
+            price = order.get('price', 0.0)
+            self.total_api_costs += fee
+            
+            if side.upper() == "BUY":
+                self.active_positions[symbol] = {"status": "ACTIVE", "amount": amount}
+            else:
+                if symbol in self.active_positions:
+                    del self.active_positions[symbol]
+                    
+            self.db.log_trade(symbol, side, amount, price, fee)
+            logger.info(f"Successfully executed {side} order for {symbol}.")
+            
+        except Exception as e:
+            err_msg = traceback.format_exc()
+            logger.error(f"Failed to execute approved trade {symbol}:\n{err_msg}")
+            self.db.log_system_error("ERROR", err_msg, 0.0)
 
     def verify_connection(self) -> bool:
         """
@@ -102,60 +137,45 @@ class TradeManager:
             if symbol in self.active_positions:
                 if signal_data.get("decision") == "SELL" and signal_data.get("confidence", 0) > 80:
                     logger.info(f"Closing position for {symbol} due to strong SELL signal.")
-                    try:
-                        # Assuming holding amount is tracked or fetched. For now, executing a close.
-                        # We would ideally fetch the actual balance of the base currency here.
-                        # Mocking balance amount for syntax:
-                        amount_to_sell = self.active_positions[symbol].get("amount", 0)
-                        if amount_to_sell > 0:
-                            order = self.exchange.create_market_sell_order(symbol, amount_to_sell)
-                            fee = order.get('fee', {}).get('cost', 0.5) # approximate if not returned
-                            price = order.get('price', 0.0)
-                            self.total_api_costs += fee
-                            self.db.log_trade(symbol, "SELL", amount_to_sell, price, fee)
-                        del self.active_positions[symbol]
-                    except Exception as e:
-                        err_msg = traceback.format_exc()
-                        logger.error(f"Failed to sell {symbol}:\n{err_msg}")
-                        self.db.log_system_error("ERROR", err_msg, 0.0)
+                    amount_to_sell = self.active_positions[symbol].get("amount", 0)
+                    if amount_to_sell > 0:
+                        reason = signal_data.get("reason", "Strong SELL consensus from AI debate.")
+                        trade_payload = {"symbol": symbol, "side": "SELL", "amount": amount_to_sell}
+                        
+                        if BotState.mode == "SEMI_AUTO":
+                            self.notifier.request_trade_approval(symbol, "SELL", amount_to_sell, signal_data.get("confidence", 0), reason)
+                        else:
+                            self.execute_approved_trade(trade_payload)
+                            self.notifier.notify_trade_executed(symbol, "SELL", amount_to_sell, signal_data.get("confidence", 0), reason)
                         
                 elif signal_data.get("daily_yield", 1) < 0:
                     logger.info(f"Closing position for {symbol} due to negative internal yield.")
-                    try:
-                        amount_to_sell = self.active_positions[symbol].get("amount", 0)
-                        if amount_to_sell > 0:
-                            order = self.exchange.create_market_sell_order(symbol, amount_to_sell)
-                            fee = order.get('fee', {}).get('cost', 0.5) 
-                            price = order.get('price', 0.0)
-                            self.total_api_costs += fee
-                            self.db.log_trade(symbol, "SELL", amount_to_sell, price, fee)
-                        del self.active_positions[symbol]
-                    except Exception as e:
-                        err_msg = traceback.format_exc()
-                        logger.error(f"Failed to sell {symbol}:\n{err_msg}")
-                        self.db.log_system_error("ERROR", err_msg, 0.0)
+                    amount_to_sell = self.active_positions[symbol].get("amount", 0)
+                    if amount_to_sell > 0:
+                        reason = "Negative internal yield threshold reached."
+                        trade_payload = {"symbol": symbol, "side": "SELL", "amount": amount_to_sell}
+                        
+                        if BotState.mode == "SEMI_AUTO":
+                            self.notifier.request_trade_approval(symbol, "SELL", amount_to_sell, 100, reason)
+                        else:
+                            self.execute_approved_trade(trade_payload)
+                            self.notifier.notify_trade_executed(symbol, "SELL", amount_to_sell, 100, reason)
 
         # 2. Open new positions on strong signals
         for symbol, signal_data in signals.items():
             if signal_data.get("decision") == "BUY" and signal_data.get("confidence", 0) > 85:
                 if symbol not in self.active_positions:
                     logger.info(f"Opening new position for {symbol} (Confidence: {signal_data.get('confidence')}%).")
-                    try:
-                        # Determine order size (normally done via calculating Kelly fraction from math_tools)
-                        # Here we use a safe minimal standard or fractional split of capital for the demo code structure
-                        amount_to_buy = 0.01 # Placeholder for exact size calculated elsewhere
-                        order = self.exchange.create_market_buy_order(symbol, amount_to_buy)
-                        
-                        fee = order.get('fee', {}).get('cost', 0.5)
-                        price = order.get('price', 0.0)
-                        self.total_api_costs += fee
-                        self.active_positions[symbol] = {"status": "ACTIVE", "amount": amount_to_buy}
-                        self.db.log_trade(symbol, "BUY", amount_to_buy, price, fee)
-                        self.notifier.notify_trade_approved(symbol, "BUY", amount_to_buy, signal_data.get('confidence', 0))
-                    except Exception as e:
-                        err_msg = traceback.format_exc()
-                        logger.error(f"Failed to buy {symbol}:\n{err_msg}")
-                        self.db.log_system_error("ERROR", err_msg, 0.0)
+                    
+                    amount_to_buy = 0.01 # Placeholder for Kelly sizing
+                    reason = signal_data.get("reason", "Strong BUY consensus from AI debate.")
+                    trade_payload = {"symbol": symbol, "side": "BUY", "amount": amount_to_buy}
+                    
+                    if BotState.mode == "SEMI_AUTO":
+                        self.notifier.request_trade_approval(symbol, "BUY", amount_to_buy, signal_data.get("confidence", 0), reason)
+                    else:
+                        self.execute_approved_trade(trade_payload)
+                        self.notifier.notify_trade_executed(symbol, "BUY", amount_to_buy, signal_data.get("confidence", 0), reason)
 
 
 # Local Testing
