@@ -16,6 +16,8 @@ class OmegaApexAutopilot:
         self.market_fetcher = MarketFetcher("binance")
         self.macro_fetcher = MacroFetcher()
         self.whale_fetcher = WhaleAlertFetcher()
+        from data.social_scraper import SocialScraper
+        self.news_fetcher = SocialScraper()
         
         api_key = os.environ.get("BINANCE_API_KEY", "mock_key")
         secret_key = os.environ.get("BINANCE_SECRET_KEY", "mock_secret")
@@ -59,6 +61,8 @@ class OmegaApexAutopilot:
         
         # Fetch Macro Weather (Global)
         macro_report = await self.macro_fetcher.fetch_latest_events()
+        # Fetch Live Crypto News
+        news_report = await self.news_fetcher.scrape_latest_news()
         
         signals = {}
         for symbol in self.symbols:
@@ -78,6 +82,7 @@ class OmegaApexAutopilot:
             # 2. Prepare State for AI Debate
             initial_state = {
                 "market_data": market_data_str,
+                "news_report": news_report,
                 "macro_report": macro_report,
                 "whale_report": whale_report,
                 "round_number": 1

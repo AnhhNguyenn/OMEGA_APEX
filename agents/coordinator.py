@@ -13,6 +13,7 @@ load_dotenv()
 # Define the Graph State
 class AgentState(TypedDict):
     market_data: str
+    news_report: str
     scout_report: str
     macro_report: str
     whale_report: str
@@ -25,12 +26,14 @@ class AgentState(TypedDict):
 
 def scout_node(state: AgentState):
     """
-    Scout (Gemini Flash): Gathers & summarizes raw data.
+    Scout (Gemini Flash): Gathers & summarizes raw data and LIVE NEWS.
     """
-    logger.info(f"[Round {state['round_number']}] Scout is analyzing raw data...")
+    logger.info(f"[Round {state['round_number']}] Scout is analyzing raw data and live news...")
+    prompt = f"Summarize this market data and correlate it with the recent news context simply:\nMARKET: {state.get('market_data', '')}\nLIVE NEWS: {state.get('news_report', 'No news.')}"
+    
     response = completion(
         model="gemini/gemini-1.5-flash",
-        messages=[{"role": "user", "content": f"Summarize this market data simply: {state.get('market_data', '')}"}]
+        messages=[{"role": "user", "content": prompt}]
     )
     return {"scout_report": response.choices[0].message.content if hasattr(response, 'choices') else response}
 

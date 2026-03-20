@@ -1,98 +1,94 @@
 import aiohttp
 import asyncio
 import json
-from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
 from typing import List, Dict, Any
+from config.logger_setup import setup_logger
+
+logger = setup_logger("social_scraper")
 
 class SocialScraper:
-    def __init__(self, batch_size: int = 50):
+    def __init__(self, batch_size: int = 20):
         """
-        Initialize the scraper.
-        Batch size defines how many raw news items to semantic-batch into one JSON sequence.
+        Fetches live crypto news via RSS feeds to feed the Scout AI.
         """
         self.batch_size = batch_size
+        # Using public RSS feeds for live Crypto news
+        self.rss_feeds = [
+            "https://cointelegraph.com/rss/tag/bitcoin",
+            "https://cointelegraph.com/rss/tag/altcoin"
+        ]
 
-    async def fetch_html(self, session: aiohttp.ClientSession, url: str) -> str:
-        """
-        Fetch raw HTML content from a URL asynchronously.
-        """
+    async def fetch_rss(self, session: aiohttp.ClientSession, url: str) -> str:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         try:
             async with session.get(url, headers=headers, timeout=10) as response:
                 if response.status == 200:
                     return await response.text()
                 else:
-                    print(f"Failed to fetch {url}: Status {response.status}")
+                    logger.warning(f"Failed to fetch RSS {url}: Status {response.status}")
                     return ""
         except Exception as e:
-            print(f"Error fetching {url}: {e}")
+            logger.error(f"Error fetching RSS {url}: {e}")
             return ""
 
-    def parse_mock_news(self, html: str) -> List[Dict[str, str]]:
-        """
-        A generic mock parser using BeautifulSoup to extract paragraph texts.
-        In a real scenario, this would target specific news sites or RSS feeds.
-        """
-        if not html:
+    def parse_rss_news(self, xml_data: str) -> List[Dict[str, str]]:
+        if not xml_data:
             return []
             
-        soup = BeautifulSoup(html, 'html.parser')
-        
-        # Extract headers and paragraphs as mockup news items
         items = []
-        for element in soup.find_all(['h2', 'h3', 'p']):
-            text = element.get_text(strip=True)
-            if len(text) > 30: # Filter out very short UI texts
-                items.append({"content": text, "source": "web_scrape"})
-                
+        try:
+            root = ET.fromstring(xml_data)
+            for item in root.findall('.//item'):
+                title = item.find('title').text if item.find('title') is not None else ""
+                # Some RSS feeds put the main content in description or content:encoded
+                desc = item.find('description').text if item.find('description') is not None else ""
+                if title:
+                    # Strip basic HTML tags from description if present
+                    import re
+                    clean_desc = re.sub('<[^<]+>', '', desc)[:200] # keep it short
+                    items.append({"title": title, "summary": clean_desc})
+        except Exception as e:
+            logger.error(f"Error parsing RSS XML: {e}")
+            
         return items
 
     def create_semantic_batches(self, items: List[Dict[str, str]]) -> List[str]:
-        """
-        Group multiple extracted text items into JSON string batches.
-        This optimizes AI token usage by submitting a large array of items to the LLM
-        instead of multiple small requests.
-        """
         batches = []
         for i in range(0, len(items), self.batch_size):
             batch_slice = items[i:i + self.batch_size]
-            batch_json = json.dumps({"batch_id": i // self.batch_size, "items": batch_slice}, ensure_ascii=False)
+            batch_json = json.dumps({"news_batch": batch_slice}, ensure_ascii=False)
             batches.append(batch_json)
         return batches
 
-    async def scrape_and_batch(self, urls: List[str]) -> List[str]:
+    async def scrape_latest_news(self) -> str:
         """
-        Main runner: scrape multiple URLs concurrently and create semantic batches.
+        Fetches live news from all configured RSS feeds and returns a summarized JSON string.
         """
         all_items = []
+        logger.info("Fetching LIVE Crypto News via RSS...")
         async with aiohttp.ClientSession() as session:
-            tasks = [self.fetch_html(session, url) for url in urls]
-            html_results = await asyncio.gather(*tasks)
+            tasks = [self.fetch_rss(session, url) for url in self.rss_feeds]
+            xml_results = await asyncio.gather(*tasks)
             
-            for html in html_results:
-                items = self.parse_mock_news(html)
+            for xml_data in xml_results:
+                items = self.parse_rss_news(xml_data)
                 all_items.extend(items)
                 
-        # Group into semantic batches
-        batched_jsons = self.create_semantic_batches(all_items)
-        return batched_jsons
+        # We only need the top 15 most recent news items to avoid blowing up the LLM context
+        top_items = all_items[:15]
+        if not top_items:
+            return "No recent news found."
+            
+        return json.dumps({"live_news": top_items})
 
 # For local testing
 if __name__ == "__main__":
     async def main():
-        scraper = SocialScraper(batch_size=5)
-        # Using a public site with lots of text for mock scraping
-        test_urls = ["https://en.wikipedia.org/wiki/Cryptocurrency", "https://en.wikipedia.org/wiki/Algorithmic_trading"]
-        print(f"Scraping URLs: {test_urls}...")
-        
-        batches = await scraper.scrape_and_batch(test_urls)
-        print(f"Generated {len(batches)} semantic batches.")
-        
-        if batches:
-            print(f"\\nPreview of First Batch (JSON string):")
-            # Print a snippet to keep output clean
-            print(f"{batches[0][:500]}...")
+        scraper = SocialScraper()
+        news = await scraper.scrape_latest_news()
+        print(f"Scraped Live News Data:\n{news[:1000]}...")
             
     asyncio.run(main())
